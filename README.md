@@ -22,10 +22,9 @@ Get meta data on tables
 
 The only function of metaR curretly is to get meta data on tables such as Data Frames, Data Tables, Tibbels etc.
 
-To do this, simply run the get\_metadata() function.
+To do this, simply run the get\_metadata() function:
 
 ``` r
-
 library(metaR)
 #> Loading required package: data.table
 #> Loading required package: magrittr
@@ -38,16 +37,13 @@ df <-
     date = as.POSIXct("2010-01-01"))
 
 df_meta <- get_metadata(df)
-
-print(df_meta)
-#>       name colNo           class empty_count empty_pct uniqueValues_count
-#> 1  letters     1          factor           0      0.00                 26
-#> 2      num     2         integer           0      0.00                 26
-#> 3 letters2     3          factor          12     46.15                  3
-#> 4     date     4 POSIXct, POSIXt           0      0.00                  1
-#>   uniqueValues_pct dataExample
-#> 1           100.00           m
-#> 2           100.00           1
-#> 3            11.54           b
-#> 4             3.85  2010-01-01
 ```
+
+Which will return:
+
+| name     |  colNo| class           |  empty\_count|  empty\_pct|  unique\_count|  unique\_pct| example    |
+|:---------|------:|:----------------|-------------:|-----------:|--------------:|------------:|:-----------|
+| letters  |      1| factor          |             0|        0.00|             26|       100.00| u          |
+| num      |      2| integer         |             0|        0.00|             26|       100.00| 1          |
+| letters2 |      3| factor          |            12|       46.15|              3|        11.54| b          |
+| date     |      4| POSIXct, POSIXt |             0|        0.00|              1|         3.85| 2010-01-01 |

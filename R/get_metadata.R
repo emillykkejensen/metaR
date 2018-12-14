@@ -9,8 +9,12 @@
 #'
 #' @param data The data you want meta data on - can be in the form of a
 #' Data Frame, Data Table or Tibble (possible others).
-#' @param example Logical Vector; If TRUE (default) it will add a colum in
+#' @param include_pct Logical Vector; If TRUE (default) the return will include
+#' the percentage of values i a column (x_pct).
+#' @param show_example Logical Vector; If TRUE (default) it will add a colum in
 #' the return with an example of an averagely selected (non NA) data point.
+#' @param show_NA Logical Vector; If TRUE the return will include na_count
+#' @param show_NULL Logical Vector; If TRUE the return will include null_count
 #'
 #' @return A data vector of type input (if data is Data Table, the returned
 #' value is Data Table, if input is Data Frame the returned value is Data Frame etc.)
@@ -20,12 +24,12 @@
 #'   \item \strong{name:} The name of the column
 #'   \item \strong{colNo:} The position of the column, counting fom the left
 #'   \item \strong{class:} The class type of the column
-#'   \item \strong{na_count:} The number of NA values in the column
-#'   \item \strong{null_count:} The number of NULL values in the column
+#'   \item \strong{na_count:} (optional) The number of NA values in the column
+#'   \item \strong{null_count:} (optional) The number of NULL values in the column
 #'   \item \strong{empty_count:} The number of NA and/or NULL values in the column
-#'   \item \strong{empty_pct:} The percentage of empty values in the column
+#'   \item \strong{empty_pct:} (optional) The percentage of empty values in the column
 #'   \item \strong{unique_count:} The number of unique values in the column
-#'   \item \strong{unique_pct:} The percentage of unique values in the column
+#'   \item \strong{unique_pct:} (optional) The percentage of unique values in the column
 #'   \item \strong{example:} (optional) Examples of data in the column. For numeric data
 #'   selected by mean and for text data, selected by the avg. length of the text.
 #' }
@@ -39,14 +43,23 @@
 #'     letters2 = c(rep("a", 4),rep(NA_character_, 6), rep("b", 10), rep(NA_character_, 6)),
 #'     date = as.POSIXct("2010-01-01"))
 #'
-#' df_meta <- get_metadata(df)
 #'
-#' print(df_meta)
+#' # To show the default output run:
+#' df_meta_1 <- get_metadata(df)
+#'
+#'
+#' # To show NAs and NULLs set these arguments to TRUE:
+#' df_meta_2 <- get_metadata(df, show_NA = TRUE, show_NULL = TRUE)
+#'
+#'
+#' # To show the least amount of metadata:
+#' df_meta_3 <- get_metadata(df, include_pct = FALSE, show_example = FALSE)
+#'
 #'
 #' @import data.table magrittr
 #'
 #' @export
-get_metadata <- function(data, example = TRUE){
+get_metadata <- function(data, include_pct = TRUE, show_example = TRUE, show_NA = FALSE, show_NULL = FALSE){
 
   inputclass <- class(data)
 
@@ -68,21 +81,26 @@ get_metadata <- function(data, example = TRUE){
   metaDT[class == "list", null_count := sapply(name, function(x) sum(sapply(data[[get("x")]], function(y) sum(is.null(y)))) )]
 
   metaDT[, empty_count := na_count + null_count]
-  metaDT[, c("na_count", "null_count") := NULL]
+  if(!show_NA) metaDT[, "na_count" := NULL]
+  if(!show_NULL) metaDT[, "null_count" := NULL]
 
 
-  metaDT[, empty_pct := (empty_count / nrow(data)) * 100]
-  metaDT[, empty_pct := round(empty_pct, digits = 2)]
+  if(include_pct){
+    metaDT[, empty_pct := (empty_count / nrow(data)) * 100]
+    metaDT[, empty_pct := round(empty_pct, digits = 2)]
+  }
 
 
   metaDT[, unique_count := NA_integer_]
   metaDT[, unique_count := sapply(name, function(x) data[[get("x")]] %>% unique() %>% length() )]
 
-  metaDT[, unique_pct := (unique_count / nrow(data)) * 100]
-  metaDT[, unique_pct := round(unique_pct, digits = 2)]
+  if(include_pct){
+    metaDT[, unique_pct := (unique_count / nrow(data)) * 100]
+    metaDT[, unique_pct := round(unique_pct, digits = 2)]
+  }
 
 
-  if(example){
+  if(show_example){
 
     metaDT[, example := NA_character_]
 

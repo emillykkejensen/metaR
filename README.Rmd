@@ -33,10 +33,9 @@ devtools::install_github("emillykkejensen/metaR")
 
 The only function of metaR curretly is to get meta data on tables such as Data Frames, Data Tables, Tibbels etc.
 
-To do this, simply run the get_metadata() function.
+To do this, simply run the get_metadata() function:
 
 ```{r}
-
 library(metaR)
 
 df <-
@@ -47,7 +46,10 @@ df <-
     date = as.POSIXct("2010-01-01"))
 
 df_meta <- get_metadata(df)
+```
 
-print(df_meta)
+Which will return:
 
+```{r echo=FALSE, results='asis'}
+knitr::kable(df_meta)
 ```
