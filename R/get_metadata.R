@@ -74,11 +74,11 @@ get_metadata <- function(data, include_pct = TRUE, show_example = TRUE, show_NA 
   metaDT[, na_count := NA_integer_]
   metaDT[, null_count := NA_integer_]
 
-  metaDT[class != "list", na_count := sapply(name, function(x) sum(is.na(data[[get("x")]])))]
-  metaDT[class != "list", null_count := sapply(name, function(x) sum(is.null(data[[get("x")]])))]
+  metaDT[class != "list", na_count := sapply(colNo, function(x) sum(is.na(data[[x]])))]
+  metaDT[class != "list", null_count := sapply(colNo, function(x) sum(is.null(data[[x]])))]
 
-  metaDT[class == "list", na_count := sapply(name, function(x) sum(sapply(data[[get("x")]], function(y) sum(is.na(y)))) )]
-  metaDT[class == "list", null_count := sapply(name, function(x) sum(sapply(data[[get("x")]], function(y) sum(is.null(y)))) )]
+  metaDT[class == "list", na_count := sapply(colNo, function(x) sum(sapply(data[[x]], function(y) sum(is.na(y)))) )]
+  metaDT[class == "list", null_count := sapply(colNo, function(x) sum(sapply(data[[x]], function(y) sum(is.null(y)))) )]
 
   metaDT[, empty_count := na_count + null_count]
   if(!show_NA) metaDT[, "na_count" := NULL]
@@ -92,7 +92,7 @@ get_metadata <- function(data, include_pct = TRUE, show_example = TRUE, show_NA 
 
 
   metaDT[, unique_count := NA_integer_]
-  metaDT[, unique_count := sapply(name, function(x) data[[get("x")]] %>% unique() %>% length() )]
+  metaDT[, unique_count := sapply(colNo, function(x) data[[x]] %>% unique() %>% length() )]
 
   if(include_pct){
     metaDT[, unique_pct := (unique_count / nrow(data)) * 100]
@@ -104,29 +104,32 @@ get_metadata <- function(data, include_pct = TRUE, show_example = TRUE, show_NA 
 
     metaDT[, example := NA_character_]
 
-    metaDT[class == "character", example := sapply(name, function(x){
-      nchars <- na.omit(data[[get("x")]]) %>% nchar()
-      return(na.omit(data[[get("x")]])[!is.na][which.min(abs(nchars - mean(nchars, na.rm = TRUE)))])
+    metaDT[class == "character", example := sapply(colNo, function(x){
+      nchars <- na.omit(data[[x]]) %>% nchar()
+      out <- na.omit(data[[x]])
+      out <- out[!is.na(out)]
+      out <- out[which.min(abs(nchars - mean(nchars, na.rm = TRUE)))]
+      return(out)
     })]
 
-    metaDT[class == "list", example := sapply(name, function(x){
-      length <- sapply(data[[!is.na(get("x"))]], length)
-      na.omit(data[[get("x")]])[which.min(abs(length - mean(length, na.rm = TRUE)))] %>%
+    metaDT[class == "list", example := sapply(colNo, function(x){
+      length <- sapply(data[[!is.na(x)]], length)
+      na.omit(data[[x]])[which.min(abs(length - mean(length, na.rm = TRUE)))] %>%
         paste() %>%
         return()
     })]
 
-    metaDT[class == "integer" | class == "numeric", example := sapply(name, function(x){
-      meanX <- data[[get("x")]] %>% mean(na.rm = TRUE)
-      na.omit(data[[get("x")]])[which.min(abs(meanX - mean(meanX, na.rm = TRUE)))] %>%
+    metaDT[class == "integer" | class == "numeric", example := sapply(colNo, function(x){
+      meanX <- data[[x]] %>% mean(na.rm = TRUE)
+      na.omit(data[[x]])[which.min(abs(meanX - mean(meanX, na.rm = TRUE)))] %>%
         as.character() %>%
         return()
     })]
 
     metaDT[class != "list" & class != "character" & class != "integer" & class != "numeric",
-           example := sapply(name, function(x){
-             if(na.omit(data[[get("x")]]) %>% length() == 0) return(NA_character_) else {
-               data[[get("x")]] %>% na.omit() %>% sample(1) %>% as.character() %>% return()
+           example := sapply(colNo, function(x){
+             if(na.omit(data[[x]]) %>% length() == 0) return(NA_character_) else {
+               data[[x]] %>% na.omit() %>% sample(1) %>% as.character() %>% return()
              }
            })]
 
