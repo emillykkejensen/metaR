@@ -4,13 +4,13 @@
 \alias{get_metadata}
 \title{Get meta data}
 \usage{
-get_metadata(data, dataExample = TRUE)
+get_metadata(data, example = TRUE)
 }
 \arguments{
 \item{data}{The data you want meta data on - can be in the form of a
 Data Frame, Data Table or Tibble (possible others).}
 
-\item{dataExample}{Logical Vector; If TRUE (default) it will add a colum in
+\item{example}{Logical Vector; If TRUE (default) it will add a colum in
 the return with an example of an averagely selected (non NA) data point.}
 }
 \value{
@@ -26,9 +26,9 @@ The returned data will include the following columns:
   \item \strong{null_count:} The number of NULL values in the column
   \item \strong{empty_count:} The number of NA and/or NULL values in the column
   \item \strong{empty_pct:} The percentage of empty values in the column
-  \item \strong{uniqueValues_count:} The number of unique values in the column
-  \item \strong{uniqueValues_pct:} The percentage of unique values in the column
-  \item \strong{dataExample:} (optional) Examples of data in the column. For numeric data
+  \item \strong{unique_count:} The number of unique values in the column
+  \item \strong{unique_pct:} The percentage of unique values in the column
+  \item \strong{example:} (optional) Examples of data in the column. For numeric data
   selected by mean and for text data, selected by the avg. length of the text.
 }
 }

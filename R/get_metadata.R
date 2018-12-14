@@ -9,7 +9,7 @@
 #'
 #' @param data The data you want meta data on - can be in the form of a
 #' Data Frame, Data Table or Tibble (possible others).
-#' @param dataExample Logical Vector; If TRUE (default) it will add a colum in
+#' @param example Logical Vector; If TRUE (default) it will add a colum in
 #' the return with an example of an averagely selected (non NA) data point.
 #'
 #' @return A data vector of type input (if data is Data Table, the returned
@@ -24,9 +24,9 @@
 #'   \item \strong{null_count:} The number of NULL values in the column
 #'   \item \strong{empty_count:} The number of NA and/or NULL values in the column
 #'   \item \strong{empty_pct:} The percentage of empty values in the column
-#'   \item \strong{uniqueValues_count:} The number of unique values in the column
-#'   \item \strong{uniqueValues_pct:} The percentage of unique values in the column
-#'   \item \strong{dataExample:} (optional) Examples of data in the column. For numeric data
+#'   \item \strong{unique_count:} The number of unique values in the column
+#'   \item \strong{unique_pct:} The percentage of unique values in the column
+#'   \item \strong{example:} (optional) Examples of data in the column. For numeric data
 #'   selected by mean and for text data, selected by the avg. length of the text.
 #' }
 #'
@@ -46,7 +46,7 @@
 #' @import data.table magrittr
 #'
 #' @export
-get_metadata <- function(data, dataExample = TRUE){
+get_metadata <- function(data, example = TRUE){
 
   inputclass <- class(data)
 
@@ -75,30 +75,30 @@ get_metadata <- function(data, dataExample = TRUE){
   metaDT[, empty_pct := round(empty_pct, digits = 2)]
 
 
-  metaDT[, uniqueValues_count := NA_integer_]
-  metaDT[, uniqueValues_count := sapply(name, function(x) data[[get("x")]] %>% unique() %>% length() )]
+  metaDT[, unique_count := NA_integer_]
+  metaDT[, unique_count := sapply(name, function(x) data[[get("x")]] %>% unique() %>% length() )]
 
-  metaDT[, uniqueValues_pct := (uniqueValues_count / nrow(data)) * 100]
-  metaDT[, uniqueValues_pct := round(uniqueValues_pct, digits = 2)]
+  metaDT[, unique_pct := (unique_count / nrow(data)) * 100]
+  metaDT[, unique_pct := round(unique_pct, digits = 2)]
 
 
-  if(dataExample){
+  if(example){
 
-    metaDT[, dataExample := NA_character_]
+    metaDT[, example := NA_character_]
 
-    metaDT[class == "character", dataExample := sapply(name, function(x){
+    metaDT[class == "character", example := sapply(name, function(x){
       nchars <- na.omit(data[[get("x")]]) %>% nchar()
       return(na.omit(data[[get("x")]])[!is.na][which.min(abs(nchars - mean(nchars, na.rm = TRUE)))])
     })]
 
-    metaDT[class == "list", dataExample := sapply(name, function(x){
+    metaDT[class == "list", example := sapply(name, function(x){
       length <- sapply(data[[!is.na(get("x"))]], length)
       na.omit(data[[get("x")]])[which.min(abs(length - mean(length, na.rm = TRUE)))] %>%
         paste() %>%
         return()
     })]
 
-    metaDT[class == "integer" | class == "numeric", dataExample := sapply(name, function(x){
+    metaDT[class == "integer" | class == "numeric", example := sapply(name, function(x){
       meanX <- data[[get("x")]] %>% mean(na.rm = TRUE)
       na.omit(data[[get("x")]])[which.min(abs(meanX - mean(meanX, na.rm = TRUE)))] %>%
         as.character() %>%
@@ -106,7 +106,7 @@ get_metadata <- function(data, dataExample = TRUE){
     })]
 
     metaDT[class != "list" & class != "character" & class != "integer" & class != "numeric",
-           dataExample := sapply(name, function(x){
+           example := sapply(name, function(x){
              if(na.omit(data[[get("x")]]) %>% length() == 0) return(NA_character_) else {
                data[[get("x")]] %>% na.omit() %>% sample(1) %>% as.character() %>% return()
              }
